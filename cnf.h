@@ -21,9 +21,9 @@ typedef std::list<CLAUSE> CLAUSES;
 
 class cnf {
 public:
-    cnf() :
-            interpretation(INTERPRETATION()),
-            clauses(CLAUSES()) {}
+    cnf(size_t nClauses, size_t nAtoms) :
+            interpretation(INTERPRETATION(nAtoms, { -1, 0, 0 })),
+            clauses(CLAUSES(nClauses)) {}
 
     cnf(const cnf &oldCNF) = default;
 
@@ -33,15 +33,14 @@ public:
 
     void pure_literal_elimination();
 
-    bool is_false();
+    [[nodiscard]] bool is_false() const;
 
-    bool is_true();
+    [[nodiscard]] bool is_true() const;
 
     void set_value(size_t atom, bool value);
 
     bool isSAT();
 
-private:
     INTERPRETATION interpretation;
     CLAUSES clauses;
 };
