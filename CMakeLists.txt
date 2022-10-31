@@ -21,8 +21,21 @@ enable_testing()
 
 add_executable(DPLL main.cpp cnf.cpp cnf.h DPLL.cpp DPLL.h)
 #target_link_libraries(DPLL gtest_main)
-add_test(NAME test COMMAND DPLL ${CMAKE_SOURCE_DIR}\\data\\uf20-01.cnf)
-set_property(TEST test PROPERTY ENVIRONMENT "RESULT=SAT")
+add_test(NAME test1 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf20-01.cnf)
+set_property(TEST test1 PROPERTY ENVIRONMENT "RESULT=SAT")
+
+add_test(NAME test2 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uuf50-0291.cnf)
+set_property(TEST test2 PROPERTY ENVIRONMENT "RESULT=UNSAT")
+
+add_test(NAME test4 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/complex.dimacs)
+set_property(TEST test4 PROPERTY ENVIRONMENT "RESULT=SAT")
+
+add_test(NAME test3 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf175-087.cnf)
+set_property(TEST test3 PROPERTY ENVIRONMENT "RESULT=SAT")
+
+
+add_test(NAME hanoi4 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/hanoi4.cnf)
+set_property(TEST hanoi4 PROPERTY ENVIRONMENT "RESULT=SAT")
 
 #add_executable(Google_Tests_run tests.cpp)
 #target_link_libraries(Google_Tests_run gtest gtest_main)

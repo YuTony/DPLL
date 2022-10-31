@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
     cnf cnf = cnf::parse(is);
 
     std::string result = DPLL::solve(cnf) ? "SAT" : "UNSAT";
+    std::cout << result << std::endl;
 
     std::string expect_result = std::getenv("RESULT");
     if (expect_result != result)

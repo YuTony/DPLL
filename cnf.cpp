@@ -61,28 +61,33 @@ void cnf::unit_propagation() {
 
 void cnf::pure_literal_elimination() {
     for (int i = 0; i < interpretation.size(); ++i) {
-        if (interpretation[i].count > 0 && interpretation[i].count == interpretation[i].difference) {
+        if (interpretation[i].count > 0 && interpretation[i].count == std::abs(interpretation[i].difference)) {
             set_value(i, interpretation[i].difference > 0);
+//            std::cout << "detected\n";
         }
     }
 }
 
 void cnf::set_value(size_t atom, bool value) {
-    for (auto clause = clauses.begin(); clause != clauses.end(); clause++) {
+    interpretation[atom].status = value;
+    auto clause = clauses.begin();
+    while (clause != clauses.end()) {
         auto literal = clause->find(atom);
         if (literal != clause->end()) {
             if (literal->second == value){
                 for (auto const &literal_it : *clause) {
                     interpretation[literal_it.first].count--;
-                    interpretation[literal_it.first].difference += literal_it.second ? 1 : -1;
+                    interpretation[literal_it.first].difference -= literal_it.second ? 1 : -1;
                 }
-                clauses.erase(clause);
+                clause = clauses.erase(clause);
+                continue;
             } else {
                 interpretation[literal->first].count--;
-                interpretation[literal->first].difference += literal->second ? 1 : -1;
+                interpretation[literal->first].difference -= literal->second ? 1 : -1;
                 clause->erase(literal);
             }
         }
+        clause++;
     }
 }
 
@@ -94,5 +99,22 @@ bool cnf::is_false() const {
 
 bool cnf::is_true() const {
     return clauses.empty();
+}
+
+cnf::cnf(const cnf &oldCNF) : cnf(oldCNF.clauses.size(), oldCNF.interpretation.size()) {
+    auto it1 = oldCNF.interpretation.begin();
+    auto it2 = interpretation.begin();
+    while (it1 != oldCNF.interpretation.end() && it2 != interpretation.end()) {
+        it2->difference = it1->difference;
+        it2->count = it1->count;
+        it2->status = it1->status;
+        it1++; it2++;
+    }
+    auto it3 = oldCNF.clauses.begin();
+    auto it4 = clauses.begin();
+    while (it3 != oldCNF.clauses.end() && it4 != clauses.end()) {
+        std::copy(it3->begin(), it3->end(), std::inserter(*it4, it4->end()));
+        it3++; it4++;
+    }
 }
 
