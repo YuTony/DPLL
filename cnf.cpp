@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <algorithm>
 
-constexpr auto max_size = std::numeric_limits<std::streamsize>::max();
+// constexpr auto max_size = std::numeric_limits<std::streamsize>::max();
 
 cnf cnf::parse(std::ifstream &is) {
     if (!is.is_open())
@@ -48,27 +48,31 @@ bool cnf::isSAT() {
     return true;
 }
 
-void cnf::unit_propagation() {
+bool cnf::unit_propagation() {
     while (true) {
         auto it = std::find_if(clauses.begin(), clauses.end(), [](const auto &clause) {
             return clause.size() == 1;
         });
         if (it == clauses.end())
             break;
-        set_value(it->begin()->first, it->begin()->second);
+        if (!set_value(it->begin()->first, it->begin()->second))
+            return false;
     }
+    return true;
 }
 
-void cnf::pure_literal_elimination() {
+bool cnf::pure_literal_elimination() {
     for (int i = 0; i < interpretation.size(); ++i) {
         if (interpretation[i].count > 0 && interpretation[i].count == std::abs(interpretation[i].difference)) {
-            set_value(i, interpretation[i].difference > 0);
+            if (!set_value(i, interpretation[i].difference > 0)) 
+            return false;
 //            std::cout << "detected\n";
         }
     }
+    return true;
 }
 
-void cnf::set_value(size_t atom, bool value) {
+bool cnf::set_value(size_t atom, bool value) {
     interpretation[atom].status = value;
     auto clause = clauses.begin();
     while (clause != clauses.end()) {
@@ -82,6 +86,8 @@ void cnf::set_value(size_t atom, bool value) {
                 clause = clauses.erase(clause);
                 continue;
             } else {
+                if (clause->size() == 1)
+                    return false;
                 interpretation[literal->first].count--;
                 interpretation[literal->first].difference -= literal->second ? 1 : -1;
                 clause->erase(literal);
@@ -89,6 +95,7 @@ void cnf::set_value(size_t atom, bool value) {
         }
         clause++;
     }
+    return true;
 }
 
 bool cnf::is_false() const {
@@ -101,20 +108,20 @@ bool cnf::is_true() const {
     return clauses.empty();
 }
 
-cnf::cnf(const cnf &oldCNF) : cnf(oldCNF.clauses.size(), oldCNF.interpretation.size()) {
-    auto it1 = oldCNF.interpretation.begin();
-    auto it2 = interpretation.begin();
-    while (it1 != oldCNF.interpretation.end() && it2 != interpretation.end()) {
-        it2->difference = it1->difference;
-        it2->count = it1->count;
-        it2->status = it1->status;
-        it1++; it2++;
-    }
-    auto it3 = oldCNF.clauses.begin();
-    auto it4 = clauses.begin();
-    while (it3 != oldCNF.clauses.end() && it4 != clauses.end()) {
-        std::copy(it3->begin(), it3->end(), std::inserter(*it4, it4->end()));
-        it3++; it4++;
-    }
-}
+// cnf::cnf(const cnf &oldCNF) : cnf(oldCNF.clauses.size(), oldCNF.interpretation.size()) {
+//     auto it1 = oldCNF.interpretation.begin();
+//     auto it2 = interpretation.begin();
+//     while (it1 != oldCNF.interpretation.end() && it2 != interpretation.end()) {
+//         it2->difference = it1->difference;
+//         it2->count = it1->count;
+//         it2->status = it1->status;
+//         it1++; it2++;
+//     }
+//     auto it3 = oldCNF.clauses.begin();
+//     auto it4 = clauses.begin();
+//     while (it3 != oldCNF.clauses.end() && it4 != clauses.end()) {
+//         std::copy(it3->begin(), it3->end(), std::inserter(*it4, it4->end()));
+//         it3++; it4++;
+//     }
+// }
 

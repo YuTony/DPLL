@@ -25,19 +25,19 @@ public:
             interpretation(INTERPRETATION(nAtoms, { -1, 0, 0 })),
             clauses(CLAUSES(nClauses)) {}
 
-    cnf(const cnf &oldCNF);
+    // cnf(const cnf &oldCNF);
 
     static cnf parse(std::ifstream &s);
 
-    void unit_propagation();
+    bool unit_propagation();
 
-    void pure_literal_elimination();
+    bool pure_literal_elimination();
 
     [[nodiscard]] bool is_false() const;
 
     [[nodiscard]] bool is_true() const;
 
-    void set_value(size_t atom, bool value);
+    bool set_value(size_t atom, bool value);
 
     bool isSAT();
 

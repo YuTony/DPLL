@@ -10,8 +10,13 @@ bool DPLL::solve(const cnf &input_cnf) {
     while (!stack.empty()) {
         cnf current_cnf = stack.top();
         stack.pop();
-        current_cnf.unit_propagation();
-        current_cnf.pure_literal_elimination();
+
+        if (!current_cnf.unit_propagation())
+            continue;
+
+        if (!current_cnf.pure_literal_elimination())
+            continue;
+            
         if (current_cnf.is_true()) return true;
         if (current_cnf.is_false()) {
             continue;
@@ -30,12 +35,12 @@ bool DPLL::solve(const cnf &input_cnf) {
         std::cout << i << std::endl;
 
         cnf right_cnf(current_cnf);
-        right_cnf.set_value(i, true);
-        stack.push(right_cnf);
+        if (right_cnf.set_value(i, true))
+            stack.push(right_cnf);
 
         cnf left_cnf(current_cnf);
-        left_cnf.set_value(i, false);
-        stack.push(left_cnf);
+        if (left_cnf.set_value(i, false))
+            stack.push(left_cnf);
     }
     return false;
 }
