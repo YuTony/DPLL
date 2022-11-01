@@ -33,8 +33,20 @@ set_property(TEST test50 PROPERTY ENVIRONMENT "RESULT=UNSAT")
 add_test(NAME test75 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf75-01.cnf)
 set_property(TEST test75 PROPERTY ENVIRONMENT "RESULT=SAT")
 
+add_test(NAME test100_1 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf100-430/uf100-040.cnf)
+set_property(TEST test100_1 PROPERTY ENVIRONMENT "RESULT=SAT")
+
 add_test(NAME test175 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf175-087.cnf)
 set_property(TEST test175 PROPERTY ENVIRONMENT "RESULT=SAT")
+
+#file(GLOB files "${CMAKE_SOURCE_DIR}/data/uf100-430/*.cnf")
+#foreach(file ${files})
+#    add_test(NAME validate_${file} COMMAND DPLL ${file})
+#    set_property(TEST validate_${file} PROPERTY ENVIRONMENT "RESULT=SAT")
+#endforeach()
+
+add_test(NAME test250 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf250-029.cnf)
+set_property(TEST test250 PROPERTY ENVIRONMENT "RESULT=SAT")
 
 add_test(NAME hanoi4 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/hanoi4.cnf)
 set_property(TEST hanoi4 PROPERTY ENVIRONMENT "RESULT=SAT")

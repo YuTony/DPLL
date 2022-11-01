@@ -25,14 +25,21 @@ bool DPLL::solve(const cnf &input_cnf) {
 //        current_cnf.clauses.sort([](const auto &a1, const auto &a2) {
 //           return a2.size() > a1.size();
 //        });
-
+//
 //        size_t i = current_cnf.clauses.begin()->begin()->first;
 
-        size_t i =  std::find_if(current_cnf.interpretation.begin(), current_cnf.interpretation.end(), [](const auto &literal) {
-            return (literal.status == -1 && literal.count > 0);
+//        size_t i =  std::find_if(current_cnf.interpretation.begin(), current_cnf.interpretation.end(), [](const auto &literal) {
+//            return (literal.status == -1 && literal.count > 0);
+//        }) - current_cnf.interpretation.begin();
+
+        size_t i = std::max_element(current_cnf.interpretation.begin(), current_cnf.interpretation.end(), [](const auto &a, const auto &b) {
+            return a.status != -1 || (b.status == -1 && a.count < b.count);
         }) - current_cnf.interpretation.begin();
 
-        std::cout << i << std::endl;
+        std::cout << i << " : ";
+        for (const auto &l : current_cnf.interpretation) {
+            std::cout << (l.status == -1 ? std::to_string(l.status) : " " + std::to_string(l.status)) << ' ';
+        } std::cout << std::endl;
 
         cnf right_cnf(current_cnf);
         if (right_cnf.set_value(i, true))
