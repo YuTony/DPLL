@@ -4,7 +4,6 @@
 #include "cnf.h"
 
 #include <iostream>
-#include <limits>
 #include <sstream>
 #include <cstdlib>
 #include <algorithm>
@@ -16,7 +15,7 @@ cnf cnf::parse(std::ifstream &is) {
         throw std::runtime_error("Failed to open file for reading");
 
     std::string line;
-    size_t var_count, clauses_count;
+    int var_count, clauses_count;
 
     do {
         std::getline(is, line);
@@ -44,10 +43,6 @@ cnf cnf::parse(std::ifstream &is) {
     return newCNF;
 }
 
-bool cnf::isSAT() {
-    return true;
-}
-
 bool cnf::unit_propagation() {
     while (true) {
         auto it = std::find_if(clauses.begin(), clauses.end(), [](const auto &clause) {
@@ -72,7 +67,7 @@ bool cnf::pure_literal_elimination() {
     return true;
 }
 
-bool cnf::set_value(size_t atom, bool value) {
+bool cnf::set_value(long atom, bool value) {
     interpretation[atom].status = value;
     auto clause = clauses.begin();
     while (clause != clauses.end()) {

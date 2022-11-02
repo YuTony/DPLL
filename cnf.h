@@ -11,7 +11,7 @@
 
 struct ATOM {
     int status; // -1: undef; 0: false; 1: true;
-    size_t count;
+    long count;
     int difference;
 };
 
@@ -21,7 +21,7 @@ typedef std::list<CLAUSE> CLAUSES;
 
 class cnf {
 public:
-    cnf(size_t nClauses, size_t nAtoms) :
+    cnf(int nClauses, int nAtoms) :
             interpretation(INTERPRETATION(nAtoms, { -1, 0, 0 })),
             clauses(CLAUSES(nClauses)) {}
 
@@ -37,9 +37,7 @@ public:
 
     [[nodiscard]] bool is_true() const;
 
-    bool set_value(size_t atom, bool value);
-
-    bool isSAT();
+    bool set_value(long atom, bool value);
 
     INTERPRETATION interpretation;
     CLAUSES clauses;
