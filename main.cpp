@@ -17,8 +17,11 @@ int main(int argc, char **argv) {
     std::string result = DPLL::solve(cnf) ? "SAT" : "UNSAT";
     std::cout << result << std::endl;
 
-    std::string expect_result = std::getenv("RESULT");
-    if (expect_result != result)
-        return 1;
+    const char *expect_result_c = std::getenv("RESULT");
+    if (expect_result_c) {
+        std::string expect_result = expect_result_c;
+        if (expect_result != result)
+            return 1;
+    }
     return 0;
 }

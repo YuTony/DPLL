@@ -27,31 +27,53 @@ cnf cnf::parse(std::ifstream &is) {
     else
         throw std::runtime_error("parse error");
 
-    cnf newCNF(clauses_count, var_count);
+    CLAUSES* clauses = new CLAUSES(clauses_count);
+    cnf newCNF = cnf(var_count, clauses);
 
     int literal;
-    auto clause = newCNF.clauses.begin();
+    auto clause = clauses->begin();
     while (is >> literal) {
         if (literal == 0) {
+            if (clause->size() == 1)
+                newCNF.single_clauses.push(&(*clause));
+            newCNF.clauses_size.insert({ &(*clause), clause->size() });
             clause++;
             continue;
         }
         newCNF.interpretation[std::abs(literal) - 1].count++;
         newCNF.interpretation[std::abs(literal) - 1].difference += literal > 0 ? 1 : -1;
+        newCNF.interpretation[std::abs(literal) - 1].clauses.insert(&(*clause));
         clause->insert({ std::abs(literal) - 1, literal > 0 });
     }
     return newCNF;
 }
 
 bool cnf::unit_propagation() {
+    int i = 0;
     while (true) {
-        auto it = std::find_if(clauses.begin(), clauses.end(), [](const auto &clause) {
+        i++;
+        auto it = std::find_if(clauses->begin(), clauses->end(), [](const auto &clause) {
             return clause.size() == 1;
         });
-        if (it == clauses.end())
+        if (it == clauses->end()) {
             break;
-        if (!set_value(it->begin()->first, it->begin()->second))
+        }
+        if (!set_value(it->begin()->first, it->begin()->second)) {
+//            std::cout << "unit_propagation " << i << std::endl;
             return false;
+        }
+    }
+//    std::cout << "unit_propagation " << i << std::endl;
+    return true;
+}
+
+bool cnf::unit_propagation2() {
+    while (!single_clauses.empty()) {
+        const CLAUSE* single_clause = single_clauses.front();
+        single_clauses.pop();
+        if (!set_value(single_clause->begin()->first, single_clause->begin()->second)) {
+            return false;
+        }
     }
     return true;
 }
@@ -61,46 +83,64 @@ bool cnf::pure_literal_elimination() {
         if (interpretation[i].count > 0 && interpretation[i].count == std::abs(interpretation[i].difference)) {
             if (!set_value(i, interpretation[i].difference > 0)) 
             return false;
-//            std::cout << "detected\n";
         }
     }
     return true;
 }
 
-bool cnf::set_value(long atom, bool value) {
+bool cnf::set_value(unsigned long atom, bool value) {
+//    std::cout << "delete " << atom << std::endl;
+    if (interpretation[atom].status != -1) {
+        return true;
+    }
+
     interpretation[atom].status = value;
-    auto clause = clauses.begin();
-    while (clause != clauses.end()) {
-        auto literal = clause->find(atom);
-        if (literal != clause->end()) {
-            if (literal->second == value){
-                for (auto const &literal_it : *clause) {
+    auto clause_with_atom = interpretation[atom].clauses.begin();
+    while (clause_with_atom != interpretation[atom].clauses.end()) {
+        auto clause_with_atom_ref = *clause_with_atom;
+        auto literal_with_atom = (*clause_with_atom)->find(atom);
+        if (literal_with_atom->second == value) {
+            for (auto const &literal_it : **clause_with_atom) {
+                if (interpretation[literal_it.first].status == -1 && interpretation[literal_it.first].count) {
                     interpretation[literal_it.first].count--;
                     interpretation[literal_it.first].difference -= literal_it.second ? 1 : -1;
+                    if (literal_it.first != atom)
+                        interpretation[literal_it.first].clauses.erase(*clause_with_atom);
                 }
-                clause = clauses.erase(clause);
-                continue;
-            } else {
-                if (clause->size() == 1)
-                    return false;
-                interpretation[literal->first].count--;
-                interpretation[literal->first].difference -= literal->second ? 1 : -1;
-                clause->erase(literal);
             }
+            clauses_size[*clause_with_atom] = 0;
+//            if (!single_clauses.empty() && single_clauses.front()->begin()->first == atom) {
+//                single_clauses.pop();
+//            }
+            clauses_count--;
+            clause_with_atom = interpretation[atom].clauses.erase(clause_with_atom);
+        } else {
+            if (clauses_size[*clause_with_atom] == 1) {
+                return false;
+            }
+            interpretation[literal_with_atom->first].count--;
+            interpretation[literal_with_atom->first].difference -= literal_with_atom->second ? 1 : -1;
+//            interpretation[literal_with_atom->first].clauses.erase(*clause_with_atom);
+            if (clauses_size[*clause_with_atom] != 0)
+                clauses_size[*clause_with_atom]--;
+            if (clauses_size[*clause_with_atom] == 1) {
+                single_clauses.push(*clause_with_atom);
+//                std::cout << "add " << (*clause_with_atom)->begin()->first << std::endl;
+            }
+            clause_with_atom = interpretation[atom].clauses.erase(clause_with_atom);
         }
-        clause++;
     }
     return true;
 }
 
 bool cnf::is_false() const {
-    return std::find_if(clauses.begin(), clauses.end(), [](const auto &clause) {
+    return std::find_if(clauses->begin(), clauses->end(), [](const auto &clause) {
         return clause.size() == 0;
-    }) != clauses.end();
+    }) != clauses->end();
 }
 
 bool cnf::is_true() const {
-    return clauses.empty();
+    return clauses_count == 0;
 }
 
 // cnf::cnf(const cnf &oldCNF) : cnf(oldCNF.clauses.size(), oldCNF.interpretation.size()) {

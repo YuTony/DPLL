@@ -5,22 +5,25 @@
 #include <iostream>
 
 bool DPLL::solve(const cnf &input_cnf) {
-    std::stack<cnf> stack;
+    std::stack<cnf*> stack;
     cnf current_cnf = input_cnf;
+    bool error = false;
     while (true) {
-        if (!current_cnf.unit_propagation()) {
+        if (error || !current_cnf.unit_propagation2()) {
             if (stack.empty()) return false;
-            current_cnf = stack.top();
+            current_cnf = *stack.top();
             stack.pop();
+//            std::cout << "backstage" << std::endl;
+            error = false;
             continue;
         }
 
-        if (!current_cnf.pure_literal_elimination()) {
-            if (stack.empty()) return false;
-            current_cnf = stack.top();
-            stack.pop();
-            continue;
-        }
+//        if (!current_cnf.pure_literal_elimination()) {
+//            if (stack.empty()) return false;
+//            current_cnf = stack.top();
+//            stack.pop();
+//            continue;
+//        }
 
         if (current_cnf.is_true()) return true;
 
@@ -43,11 +46,15 @@ bool DPLL::solve(const cnf &input_cnf) {
 //            std::cout << (l.status == -1 ? std::to_string(l.status) : " " + std::to_string(l.status)) << ' ';
 //        } std::cout << std::endl;
 
-        cnf left_cnf(current_cnf);
-        if (left_cnf.set_value(i, false)) {
+//        std::cout << "clauses_count " << current_cnf.clauses_count << std::endl;
+
+        cnf* left_cnf = new cnf(current_cnf);
+        if (left_cnf->set_value(i, false)) {
             stack.push(left_cnf);
         }
-        current_cnf.set_value(i, true);
+        if (!current_cnf.set_value(i, true)) {
+            error = true;
+        }
     }
     return false;
 }
