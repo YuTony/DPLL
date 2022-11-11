@@ -1,12 +1,12 @@
 //
-// Created by Anton on 24.10.2022.
+// Created by yutony on 11/10/22.
 //
 
 #ifndef DPLL_DPLL_H
 #define DPLL_DPLL_H
 
-#include "cnf.h"
 
+#include "cnf.h"
 
 class DPLL {
 public:

@@ -1,60 +1,55 @@
 //
-// Created by Anton on 21.10.2022.
+// Created by yutony on 11/10/22.
 //
-#include <map>
-#include <vector>
-#include <fstream>
-#include <list>
-#include <unordered_set>
-#include <queue>
-#include <set>
-#include <tuple>
 
 #ifndef DPLL_CNF_H
 #define DPLL_CNF_H
 
-typedef std::map<unsigned long, bool> CLAUSE;
+#include <vector>
+#include <tuple>
+#include <set>
+#include <fstream>
+#include <queue>
 
-typedef std::list<CLAUSE> CLAUSES;
-
-struct ATOM {
-    int status; // -1: undef; 0: false; 1: true;
-    long count;
-    int difference;
-    std::unordered_set<const CLAUSE *> clauses;
+enum AtomStatus {
+    Undefined = -1,
+    False = 0,
+    True = 1
 };
 
-typedef std::vector<ATOM> INTERPRETATION;
+struct ATOM {
+    AtomStatus status;
+    unsigned int count;
+    int difference;
+    std::vector<std::pair<unsigned int, bool>>* in_clauses;
+};
+
+typedef std::vector<std::vector<std::pair<unsigned int, bool>>> CLAUSES;
 
 class cnf {
 public:
-    cnf(int nAtoms, const CLAUSES* clauses) :
-            interpretation(INTERPRETATION(nAtoms, { -1, 0, 0 })),
-            clauses(clauses),
-            clauses_count(clauses->size()) {}
+    cnf(const CLAUSES* clauses, int nAtoms);
 
-    static cnf parse(std::ifstream &s);
+    cnf(const cnf& cnf) = default;
 
-    bool unit_propagation();
-    bool unit_propagation2();
-
-    bool pure_literal_elimination();
-
-    [[nodiscard]] bool is_false() const;
+    static cnf parse(std::ifstream &is);
 
     [[nodiscard]] bool is_true() const;
 
-    bool set_value(unsigned long atom, bool value);
+    bool set_value(unsigned int atom, bool value);
 
-    const CLAUSES *clauses;
-    INTERPRETATION interpretation;
-    std::map<const CLAUSE *, unsigned int> clauses_size;
-    std::queue<const CLAUSE *> single_clauses;
+    bool unit_propagation();
+
+    unsigned int get_atom();
+
+    void release();
+
+private:
+    const CLAUSES* clauses;
+    std::vector<ATOM> interpretation;
+    std::queue<unsigned int> single_clauses;
+    std::vector<unsigned int> clauses_size;
     unsigned int clauses_count;
-
-//    ~cnf() {
-//        delete clauses;
-//    }
 };
 
 
