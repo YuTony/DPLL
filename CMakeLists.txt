@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 project(DPLL)
 
 set(CMAKE_CXX_STANDARD 17)
-set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -g")
-#set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -Wpedantic -Werror -O2")
+#set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -g")
+set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -Wpedantic -Werror -O2")
 
 #add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
@@ -47,8 +47,8 @@ set_property(TEST test175 PROPERTY ENVIRONMENT "RESULT=SAT")
 #    set_property(TEST validate_${file} PROPERTY ENVIRONMENT "RESULT=SAT")
 #endforeach()
 
-#add_test(NAME test250 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf250-029.cnf)
-#set_property(TEST test250 PROPERTY ENVIRONMENT "RESULT=SAT")
+add_test(NAME test250 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf250-029.cnf)
+set_property(TEST test250 PROPERTY ENVIRONMENT "RESULT=SAT")
 
 add_test(NAME hanoi4 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/hanoi4.cnf)
 set_property(TEST hanoi4 PROPERTY ENVIRONMENT "RESULT=SAT")

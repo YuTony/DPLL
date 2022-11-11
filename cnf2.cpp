@@ -95,9 +95,26 @@ unsigned int cnf2::get_atom() {
 //    return std::find_if(interpretation.begin(), interpretation.end(), [](const auto &literal) {
 //        return (literal.status == -1 && literal.count > 0);
 //    }) - interpretation.begin();
-    return std::max_element(interpretation.begin(), interpretation.end(), [](const auto &a, const auto &b) {
-        return a.status != -1 || (b.status == -1 && a.count < b.count);
-    }) - interpretation.begin();
+//    return std::max_element(interpretation.begin(), interpretation.end(), [](const auto &a, const auto &b) {
+//        return a.status != -1 || (b.status == -1 && a.count < b.count);
+//    }) - interpretation.begin();
+
+    unsigned int min = 0;
+    unsigned int min_i = 0;
+    for (int i = 0; i < clauses_size.size(); i++) {
+        if (min == 0 && clauses_size[i] > 1) {
+            min = clauses_size[i];
+            min_i = i;
+        } else if (clauses_size[i] >= 1 && min > clauses_size[i]) {
+            min = clauses_size[i];
+            min_i = i;
+        }
+    }
+    if (min == 0) throw std::runtime_error("aaaa");
+    auto min_l = std::find_if((*clauses)[min_i].begin(), (*clauses)[min_i].end(), [&](const auto &l) {
+        return interpretation[l.first].status == AtomStatus::Undefined;
+    });
+    return min_l->first;
 }
 
 cnf2::cnf2(const cnf2 &cnf) : clauses(cnf.clauses), single_clauses(cnf.single_clauses), clauses_size(cnf.clauses_size), clauses_count(cnf.clauses_count), interpretation(cnf.interpretation) {
