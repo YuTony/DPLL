@@ -52,18 +52,22 @@ bool cnf2::is_true() const {
 }
 
 bool cnf2::set_value(unsigned int atom, bool value) {
+    if (interpretation[atom].status != AtomStatus::Undefined) return true;
     interpretation[atom].status = static_cast<AtomStatus>(value);
     for (auto & in_clause : interpretation[atom].in_clauses) {
         if (clauses_size[in_clause.first] == 0) continue;
         if (in_clause.second == value) {
             clauses_size[in_clause.first] = 0;
             clauses_count--;
+            for (const auto & c : (*clauses)[in_clause.first]) {
+                interpretation[c.first].count--;
+            }
         } else {
             if (clauses_size[in_clause.first] == 1)
                 return false;
             clauses_size[in_clause.first]--;
             if (clauses_size[in_clause.first] == 1)
-                single_clauses.push(in_clause.second);
+                single_clauses.push(in_clause.first);
         }
     }
     return true;
@@ -76,6 +80,7 @@ bool cnf2::unit_propagation() {
         auto literal = std::find_if((*clauses)[single_clause].begin(), (*clauses)[single_clause].end(), [&](const auto& literal) {
             return interpretation[literal.first].status == AtomStatus::Undefined;
         });
+        if (literal == (*clauses)[single_clause].end()) continue;
         if (!set_value(literal->first, literal->second)) {
             return false;
         }

@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 3.22)
 project(DPLL)
 
 set(CMAKE_CXX_STANDARD 17)
-set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -ggdb")
+set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -g")
 #set(GCC_COVERAGE_COMPILE_FLAGS "-std=c++17 -Wpedantic -Werror -O2")
 
-add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
+#add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
 
 #include(FetchContent)
@@ -20,7 +20,8 @@ add_definitions(${GCC_COVERAGE_COMPILE_FLAGS})
 
 enable_testing()
 
-add_executable(DPLL main.cpp cnf.cpp cnf.h DPLL.cpp DPLL.h)
+#add_executable(DPLL main.cpp cnf.cpp cnf.h DPLL.cpp DPLL.h)
+add_executable(DPLL main.cpp cnf2.cpp cnf2.h DPLL2.cpp DPLL2.h)
 #target_link_libraries(DPLL gtest_main)
 add_test(NAME test20 COMMAND DPLL ${CMAKE_SOURCE_DIR}/data/uf20-01.cnf)
 set_property(TEST test20 PROPERTY ENVIRONMENT "RESULT=SAT")

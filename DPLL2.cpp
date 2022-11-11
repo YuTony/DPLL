@@ -28,7 +28,7 @@ bool DPLL2::solve(const cnf2 &cnf) {
 //        }) - current_cnf->interpretation.begin();
 
         unsigned int i =  current_cnf->get_atom();
-        std::cout << i << " " << current_cnf->interpretation[i].status << std::endl;
+//        std::cout << i << " " << current_cnf->interpretation[i].status << std::endl;
 
         cnf2* left_cnf = new cnf2(*current_cnf);
         if (left_cnf->set_value(i, false)) {
