@@ -10,14 +10,19 @@ int main(int argc, char **argv) {
         return 1;
     }
     std::string file_name = argv[1];
-    std::cout << file_name << std::endl;
     std::ifstream is(file_name);
     cnf cnf = cnf::parse(is);
 
     std::string result = DPLL::solve(cnf) ? "SAT" : "UNSAT";
+    std::cout << result << std::endl;
 
-    std::string expect_result = std::getenv("RESULT");
-    if (expect_result != result)
-        return 1;
+    cnf.release();
+
+    const char *expect_result_c = std::getenv("RESULT");
+    if (expect_result_c) {
+        std::string expect_result = expect_result_c;
+        if (expect_result != result)
+            return 1;
+    }
     return 0;
 }

@@ -1,34 +1,41 @@
 //
-// Created by Anton on 24.10.2022.
+// Created by yutony on 11/10/22.
 //
-
-#include "DPLL.h"
 
 #include <stack>
 #include <algorithm>
+#include "DPLL.h"
 
 bool DPLL::solve(const cnf &input_cnf) {
-    std::stack<cnf> stack;
-    stack.push(input_cnf);
-    while (!stack.empty()) {
-        cnf current_cnf = stack.top();
-        stack.pop();
-        current_cnf.unit_propagation();
-        current_cnf.pure_literal_elimination();
-        if (current_cnf.is_true()) return true;
-        if (current_cnf.is_false()) continue;
+    std::vector<cnf*> stack;
+    cnf* current_cnf = new cnf(input_cnf);
+    bool error = false;
+    while (true) {
+        if (error || !current_cnf->unit_propagation()) {
+            delete current_cnf;
+            if (stack.empty()) return false;
+            current_cnf = stack.back();
+            stack.pop_back();
+            error = false;
+            continue;
+        }
 
-        size_t i =  std::find_if(current_cnf.interpretation.begin(), current_cnf.interpretation.end(), [](const auto &literal) {
-            return literal.status == -1;
-        }) - current_cnf.interpretation.begin();
+        if (current_cnf->is_true()) break;
 
-        cnf right_cnf(current_cnf);
-        right_cnf.set_value(i, true);
-        stack.push(right_cnf);
+        unsigned int i =  current_cnf->get_atom();
 
-        cnf left_cnf(current_cnf);
-        left_cnf.set_value(i, false);
-        stack.push(left_cnf);
+        cnf* left_cnf = new cnf(*current_cnf);
+        if (left_cnf->set_value(i, false)) {
+            stack.push_back(left_cnf);
+        } else delete left_cnf;
+        if (!current_cnf->set_value(i, true)) {
+            error = true;
+        }
     }
-    return false;
+    delete current_cnf;
+    while (!stack.empty()) {
+        delete stack.back();
+        stack.pop_back();
+    }
+    return true;
 }
