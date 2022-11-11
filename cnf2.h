@@ -21,7 +21,7 @@ struct ATOM {
     AtomStatus status;
     unsigned int count;
     int difference;
-    std::vector<std::pair<unsigned int, bool>> in_clauses;
+    std::vector<std::pair<unsigned int, bool>>* in_clauses;
 };
 
 typedef std::vector<std::vector<std::pair<unsigned int, bool>>> CLAUSES;

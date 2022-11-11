@@ -39,9 +39,12 @@ cnf2 cnf2::parse(std::ifstream &is) {
             clause++;
             continue;
         }
+        if (!newCNF.interpretation[std::abs(literal) - 1].in_clauses) {
+            newCNF.interpretation[std::abs(literal) - 1].in_clauses = new std::vector<std::pair<unsigned int, bool>>();
+        }
         newCNF.interpretation[std::abs(literal) - 1].count++;
         newCNF.interpretation[std::abs(literal) - 1].difference += literal > 0 ? 1 : -1;
-        newCNF.interpretation[std::abs(literal) - 1].in_clauses.emplace_back(clause - clauses->begin(), literal > 0);
+        newCNF.interpretation[std::abs(literal) - 1].in_clauses->emplace_back(clause - clauses->begin(), literal > 0);
         clause->push_back({std::abs(literal) - 1, literal > 0});
     }
     return newCNF;
@@ -54,7 +57,7 @@ bool cnf2::is_true() const {
 bool cnf2::set_value(unsigned int atom, bool value) {
     if (interpretation[atom].status != AtomStatus::Undefined) return true;
     interpretation[atom].status = static_cast<AtomStatus>(value);
-    for (auto & in_clause : interpretation[atom].in_clauses) {
+    for (auto & in_clause : *(interpretation[atom].in_clauses)) {
         if (clauses_size[in_clause.first] == 0) continue;
         if (in_clause.second == value) {
             clauses_size[in_clause.first] = 0;
@@ -97,13 +100,22 @@ unsigned int cnf2::get_atom() {
     }) - interpretation.begin();
 }
 
-cnf2::cnf2(const cnf2 &cnf) : clauses(cnf.clauses), single_clauses(cnf.single_clauses), clauses_size(cnf.clauses_size), clauses_count(cnf.clauses_count) {
-    interpretation = std::vector<ATOM>();
-    for (const auto& in : cnf.interpretation) {
-        if (in.status == AtomStatus::Undefined) {
-            interpretation.push_back(in);
-        } else {
-            interpretation.push_back({in.status, in.count, in.difference});
-        }
-    }
+cnf2::cnf2(const cnf2 &cnf) : clauses(cnf.clauses), single_clauses(cnf.single_clauses), clauses_size(cnf.clauses_size), clauses_count(cnf.clauses_count), interpretation(cnf.interpretation) {
+//    interpretation = std::vector<ATOM>();
+//
+//    for (const auto& in : cnf.interpretation) {
+//        if (in.status == AtomStatus::Undefined) {
+//            interpretation.push_back(in);
+//        } else {
+//            interpretation.push_back({in.status, in.count, in.difference});
+//        }
+//    }
+//    std::transform(cnf.interpretation.begin(), cnf.interpretation.end(), std::back_inserter(interpretation), [](const ATOM& in) {
+//        if (in.status == AtomStatus::Undefined) {
+//            return in;
+//        } else {
+//            ATOM* a = new ATOM();
+//            return *a;
+//        }
+//    });
 }
