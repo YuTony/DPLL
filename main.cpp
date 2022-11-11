@@ -1,8 +1,8 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "cnf.h"
-#include "DPLL.h"
+#include "cnf2.h"
+#include "DPLL2.h"
 
 int main(int argc, char **argv) {
     if (argc != 2) {
@@ -12,9 +12,9 @@ int main(int argc, char **argv) {
     std::string file_name = argv[1];
     std::cout << file_name << std::endl;
     std::ifstream is(file_name);
-    cnf cnf = cnf::parse(is);
+    cnf2 cnf = cnf2::parse(is);
 
-    std::string result = DPLL::solve(cnf) ? "SAT" : "UNSAT";
+    std::string result = DPLL2::solve(cnf) ? "SAT" : "UNSAT";
     std::cout << result << std::endl;
 
     const char *expect_result_c = std::getenv("RESULT");
